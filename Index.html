@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#0d6efd" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>Entrega de turno – Esterilización Terminal</title>
+<style>
+  :root { --c1:#0d6efd; --c2:#198754; --c3:#dc3545; --c4:#6b7280; --bg:#f4f6fb; --ink:#1f2937; }
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background: var(--bg); margin:0; color:#111827; }
+  header { position: sticky; top:0; z-index:5; background:#fff; padding: .9rem 1rem calc(.6rem + env(safe-area-inset-top)); box-shadow: 0 4px 16px rgba(0,0,0,.06); }
+  header h1{ margin:0; font-size:1.15rem; }
+  header .sub { color:#64748b; font-size:.88rem; margin-top:.25rem; display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
+  .version { font-size:.75rem; background:#eef2ff; color:#1e3a8a; padding:.1rem .45rem; border-radius:999px; cursor:pointer; user-select:none; }
+  .wrap { padding:1rem; padding-bottom: calc(6.2rem + env(safe-area-inset-bottom)); max-width: 1100px; margin: 0 auto; }
+  fieldset { border:1px solid #e5e7eb; border-radius:12px; margin: .9rem 0; padding: .9rem; background:#fff; }
+  legend { padding:0 .6rem; font-weight:700; color:#111827; }
+  .grid { display:grid; grid-template-columns: repeat(12, 1fr); gap:.8rem .9rem; }
+  .col-12{grid-column: span 12;} .col-9{grid-column: span 9;} .col-8{grid-column: span 8;} .col-6{grid-column: span 6;} .col-4{grid-column:span 4;} .col-3{grid-column:span 3;}
+  @media (max-width:860px){ .col-9,.col-8,.col-6,.col-4,.col-3{grid-column:span 12;} }
+  label { display:block; font-size:.96rem; margin-bottom:.25rem; }
+  input, select, textarea { width:100%; padding:.82rem .95rem; border:1px solid #d1d5db; border-radius:12px; background:#fff; font-size:1rem; -webkit-tap-highlight-color: transparent; }
+  input.readonly, textarea.readonly{ background:#f3f6fb; }
+  textarea { min-height:88px; resize: vertical; }
+  .hint { font-size:.84rem; color:#6b7280; }
+  .muted { color:#6b7280; font-size:.92rem; }
+  .kpi { background:#f8fafc; border:1px solid #e5e7eb; border-radius:12px; padding:.7rem .9rem; display:flex; gap:1rem; align-items:center; flex-wrap:wrap;}
+  .kpi .val { font-weight:800; }
+  .ok { color: var(--c2); } .warn { color: #f59e0b; } .err { color: var(--c3); }
+  .rowline { border-top:1px dashed #e5e7eb; margin:.7rem 0 0; padding-top:.7rem; }
+  .actionbar { position: fixed; left:0; right:0; bottom:0; z-index:10; background:#fff; padding: .6rem .8rem calc(.8rem + env(safe-area-inset-bottom)); box-shadow: 0 -5px 20px rgba(0,0,0,.08); display:flex; gap:.5rem; flex-wrap:wrap; }
+  .actionbar button{ flex:1 1 48%; min-height:46px; border:none; border-radius:12px; color:#fff; font-weight:700; font-size:1rem; letter-spacing:.2px; }
+  .primary{ background:var(--c1); } .success{ background:var(--c2);} .ghost{ background:#fff; color:#111; border:1px solid #d1d5db;} .secondary{ background:var(--c4); color:#fff;}
+  .badge { display:inline-block; background:#eef2ff; color:#1e3a8a; padding:.1rem .5rem; border-radius:999px; font-size:.78rem; }
+  .paro-form { display:flex; gap:.5rem; flex-wrap:wrap; }
+  .paro-form input[type="number"]{ max-width: 140px; }
+  .paro-list { margin:.5rem 0 0; padding:0; list-style:none; }
+  .paro-item { display:flex; align-items:flex-start; gap:.6rem; border:1px solid #e5e7eb; background:#f9fafb; border-radius:10px; padding:.5rem .6rem; margin-bottom:.5rem; }
+  .paro-min { font-weight:800; color:#111827; min-width:60px; }
+  .paro-just { color:#374151; white-space: pre-wrap; }
+  .paro-actions button { border:none; background:transparent; color:#dc3545; cursor:pointer; font-weight:800; }
+  .error-msg { color:#dc3545; font-size:.85rem; margin-top:.25rem; display:none; }
+  .show { display:block; }
+
+  .sublegend { font-weight:700; margin: .3rem 0 .6rem; color:#111827; }
+  .subsection { border:1px dashed #e5e7eb; border-radius:12px; padding:.7rem .7rem; margin:.6rem 0; background:#fcfcff; }
+  .lot-card { border:1px solid #e5e7eb; border-radius:12px; padding:.7rem .7rem; margin:.5rem 0; background:#fff; }
+  .lot-title { font-weight:700; margin-bottom:.45rem; }
+  .inline-note { font-size:.85rem; color:#6b7280; margin:.2rem 0 .5rem; }
+  .alert-line { margin-top:.4rem; font-size:.9rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Entrega de turno – Esterilización Terminal</h1>
+  <div class="sub">
+    <span>Cálculo de teóricas (Turno ∩ Lote), casino, pausas, cambios de ciclo, paros y WhatsApp.</span>
+    <span class="version" id="app_version">et-1.0.0 · clic para recargar</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- DATOS GENERALES -->
+  <fieldset>
+    <legend>Datos generales</legend>
+    <div class="grid">
+      <div class="col-6">
+        <label for="fecha">Fecha (del turno)</label>
+        <input type="date" id="fecha" required />
+      </div>
+      <div class="col-6">
+        <label for="turno">Turno</label>
+        <select id="turno" required>
+          <option value="">-- Seleccione --</option>
+          <!-- Opciones se inyectan desde PROFILE -->
+        </select>
+      </div>
+      <div class="col-12">
+        <label for="ausentismos">Ausentismos</label>
+        <input type="text" id="ausentismos" placeholder="Nombres, horas, observaciones..." inputmode="text"/>
+      </div>
+    </div>
+  </fieldset>
+
+  <!-- FABRICACIÓN -->
+  <fieldset>
+    <legend>Fabricación</legend>
+    <div id="fab_container" class="grid"></div>
+    <div id="fab_alert" class="alert-line muted"></div>
+  </fieldset>
+
+  <!-- ENVASE -->
+  <fieldset>
+    <legend>Envase</legend>
+    <div id="env_container"></div>
+    <div id="env_alert" class="alert-line muted"></div>
+  </fieldset>
+
+  <!-- EMPAQUE -->
+  <fieldset>
+    <legend>Empaque</legend>
+    <div id="emp_container"></div>
+  </fieldset>
+
+  <!-- MENSAJE -->
+  <fieldset>
+    <legend>Mensaje</legend>
+    <div class="grid">
+      <div class="col-12">
+        <label for="mensaje">Texto generado (WhatsApp)</label>
+        <textarea id="mensaje" class="readonly" readonly placeholder="Toca Generar para ver el mensaje…"></textarea>
+      </div>
+    </div>
+  </fieldset>
+</div>
+
+<div class="actionbar">
+  <button class="primary" id="btn_generar">Generar</button>
+  <button class="success" id="btn_whatsapp" disabled>WhatsApp</button>
+  <button class="ghost" id="btn_copiar" disabled>Copiar</button>
+  <button class="secondary" id="btn_limpiar">Limpiar</button>
+</div>
+
+<script>
+(function(){
+  const APP_VERSION = 'et-1.0.0';
+
+  // ================== PERFIL DE PLANTA (CONFIG) ==================
+  const PROFILE = {
+    nombre: 'ESTERILIZACIÓN TERMINAL',
+    mensajeHeader: 'ENTREGA DE TURNO – ESTERILIZACIÓN TERMINAL',
+
+    // Turnos y reglas especiales
+    turnos: [
+      { id:'1_0700_1500', label:'Turno 1 (07:00–15:00)', turnoNum:'1', start:'07:00', end:'15:00', cross:'same' },
+      { id:'2_1500_2300', label:'Turno 2 (15:00–23:00)', turnoNum:'2', start:'15:00', end:'23:00', cross:'same' },
+      { id:'3_2300_0700', label:'Turno 3 (23:00–07:00)', turnoNum:'3', start:'23:00', end:'07:00', cross:'next' },
+    ],
+    saturdayOverrides: { '1':'14:10', '2':'21:45' },
+
+    // Descansos
+    casino: {
+      '1': { time: '12:00', minutes: 40, nextDay:false },
+      '2': { time: '19:00', minutes: 40, nextDay:false },
+      '3': { time: '01:00', minutes: 40, nextDay:true }
+    },
+    pausasTrabajo: { cadaMinutos: 120, pausaMinutos: 10 },
+
+    // Penalización por cambio de ciclo (minutos)
+    cicloPenalty: {
+      envase: 15,
+      empaque: 20
+    },
+
+    // Productos con velocidades para ENVASE y EMPAQUE
+    productos: [
+      { value:'TRAVAD ORAL-LIMON FCOX133CC', label:'TRAVAD ORAL-LIMON FCOX133CC', speedEnv:54, speedPack:72 },
+      { value:'TRAVAD ORAL-LIMON INST CAJAX48FCO', label:'TRAVAD ORAL-LIMON INST CAJAX48FCO', speedEnv:54, speedPack:72 },
+      { value:'TRAVAD ENEMA X 133 ML BOLSA', label:'TRAVAD ENEMA X 133 ML BOLSA', speedEnv:22, speedPack:22 },
+      { value:'TRAVAD ENEMASOL.SALINA AL 2.5 BOLSAX1000ML', label:'TRAVAD ENEMASOL.SALINA AL 2.5 BOLSAX1000ML', speedEnv:8, speedPack:8 },
+      { value:'HIDRAPLUS 75MEQ+ZINC UVA FCOX400ML', label:'HIDRAPLUS 75MEQ+ZINC UVA FCOX400ML', speedEnv:54, speedPack:72 },
+      { value:'HIDRAPLUS 75MEQ+ZINC COCO FCOX400ML', label:'HIDRAPLUS 75MEQ+ZINC COCO FCOX400ML', speedEnv:54, speedPack:72 },
+      { value:'HIDRAPLUS 75MEQ+ZINC UVA MM-FCOx400ML', label:'HIDRAPLUS 75MEQ+ZINC UVA MM-FCOx400ML', speedEnv:54, speedPack:72 },
+      { value:'HIDRAPLUS 75MEQ+ZINC CEREZA MM', label:'HIDRAPLUS 75MEQ+ZINC CEREZA MM', speedEnv:54, speedPack:72 },
+      { value:'HIDRAPLUS 75MEQ+ZINC COCO MM', label:'HIDRAPLUS 75MEQ+ZINC COCO MM', speedEnv:54, speedPack:72 },
+      { value:'HIDRAPLUS 75MEQ+ZINC CEREZA FCOX400ML', label:'HIDRAPLUS 75MEQ+ZINC CEREZA FCOX400ML', speedEnv:54, speedPack:72 },
+      { value:'HIDRAPLUS 75MEQ+ZINC MANZANA FCO X 400 ML', label:'HIDRAPLUS 75MEQ+ZINC MANZANA FCO X 400 ML', speedEnv:54, speedPack:72 },
+      { value:'HIDRAPLUS MM 75MEQ ZINC UVA FCOx400ML', label:'HIDRAPLUS MM 75MEQ ZINC UVA FCOx400ML', speedEnv:54, speedPack:72 },
+      { value:'HIDRAPLUS MM 75MEQ ZINC COCO FCOx400ML', label:'HIDRAPLUS MM 75MEQ ZINC COCO FCOx400ML', speedEnv:54, speedPack:72 },
+      { value:'HIDRAPLUS MM 75MEQ ZINC CEREZA FCOx400ML', label:'HIDRAPLUS MM 75MEQ ZINC CEREZA FCOx400ML', speedEnv:54, speedPack:72 },
+      { value:'HIDRAPLUS 75MEQ+ZINC UVA CAJ CAJX12FCO', label:'HIDRAPLUS 75MEQ+ZINC UVA CAJ CAJX12FCO', speedEnv:54, speedPack:72 },
+      { value:'HIDRAPLUS 75MEQ+ZINC CZ. CAJ CAJX12FCO', label:'HIDRAPLUS 75MEQ+ZINC CZ. CAJ CAJX12FCO', speedEnv:54, speedPack:72 },
+      { value:'HIDRAPLUS 75MEQ+ZINC COCO CAJ CAJX12FCO', label:'HIDRAPLUS 75MEQ+ZINC COCO CAJ CAJX12FCO', speedEnv:54, speedPack:72 },
+      { value:'HIDRAPLUS 75MEQ ZINC MANZ MMED FCOX400ML', label:'HIDRAPLUS 75MEQ ZINC MANZ MMED FCOX400ML', speedEnv:54, speedPack:72 },
+      { value:'CJ. HIDRAPLUS 75MEQ+ZINC MANZ. CAJAX12FCO', label:'CJ. HIDRAPLUS 75MEQ+ZINC MANZ. CAJAX12FCO', speedEnv:54, speedPack:72 },
+      { value:'HIDRAPLUS 75MEQ+ZINC MANZANA FRASCO MMED', label:'HIDRAPLUS 75MEQ+ZINC MANZANA FRASCO MMED', speedEnv:54, speedPack:72 },
+      { value:'HIDRAPLUS 75MEQ+ZINC CEREZA CAJX4SCHX100', label:'HIDRAPLUS 75MEQ+ZINC CEREZA CAJX4SCHX100', speedEnv:96, speedPack:120 },
+      { value:'HIDRAPLUS 75MEQ+ZINC UVA CAJX4SCHX100', label:'HIDRAPLUS 75MEQ+ZINC UVA CAJX4SCHX100', speedEnv:96, speedPack:120 },
+      { value:'HIDRAPLUS 75MEQ+ZINC MANZANA CAJX4SCHX100', label:'HIDRAPLUS 75MEQ+ZINC MANZANA CAJX4SCHX100', speedEnv:96, speedPack:120 },
+      { value:'HIDRAPLUS 75MEQ+ZINC CZ.SCHCAJ CAJX24PLE', label:'HIDRAPLUS 75MEQ+ZINC CZ.SCHCAJ CAJX24PLE', speedEnv:96, speedPack:120 },
+      { value:'HIDRAPLUS 75 MEQ+ ZINC UVA MM', label:'HIDRAPLUS 75 MEQ+ ZINC UVA MM', speedEnv:96, speedPack:120 },
+      { value:'HIDRAPLUS 75MEQ MANZ. CAJ CAJAX24PLE', label:'HIDRAPLUS 75MEQ MANZ. CAJ CAJAX24PLE', speedEnv:96, speedPack:120 },
+      { value:'HIDRAPLUS 75 MEQ+ZINC MANZ SCH MMED CAJ1XSCH', label:'HIDRAPLUS 75 MEQ+ZINC MANZ SCH MMED CAJ1XSCH', speedEnv:96, speedPack:120 },
+      { value:'HIDRAPLUS 75MEQ+ZINC UVA SCH. CJ.X24PLEG', label:'HIDRAPLUS 75MEQ+ZINC UVA SCH. CJ.X24PLEG', speedEnv:96, speedPack:120 },
+      { value:'HIDRAPLUS 75MEQ CEREZA MM ZINC', label:'HIDRAPLUS 75MEQ CEREZA MM ZINC', speedEnv:96, speedPack:120 },
+      { value:'HIDRAPLUS75MEQ+ZINC MNZSACMMED', label:'HIDRAPLUS75MEQ+ZINC MNZSACMMED', speedEnv:96, speedPack:120 },
+      { value:'HIDRAPLUS 75MEQ+ZINC UVA MMED', label:'HIDRAPLUS 75MEQ+ZINC UVA MMED', speedEnv:96, speedPack:120 },
+      { value:'HIDRAPLUS 75MEQ+ZINC CRZA MMED', label:'HIDRAPLUS 75MEQ+ZINC CRZA MMED', speedEnv:96, speedPack:120 },
+    ],
+
+    parosCategorias: ['equipo','proceso','alistamiento','ausentismo','materiales'],
+
+    // Secciones
+    fabricacion: { tanques: 4, minReportados: 2 },
+    envase: { secciones: ['Sachet','Frasco','Enema'], lotesPorSeccion: 2, minSeccionesActivas: 2 },
+    empaque: { secciones: ['Enfundadora','Estuchadora'], lotesPorSeccion: 2 }
+  };
+  // ===============================================================
+
+  // ======= Utilidades de fecha/hora =======
+  function parseDateOnlyLocal(s){ if(!s) return null; const [y,m,d]=s.split('-').map(Number); return new Date(y,(m||1)-1,(d||1),0,0,0,0); }
+  function parseDateTimeLocal(s){ if(!s) return null; const [date,time='00:00']=s.split('T'); const [y,m,d]=date.split('-').map(Number); const [hh,mm]=time.split(':').map(Number); return new Date(y,(m||1)-1,(d||1),(hh||0),(mm||0),0,0); }
+  function two(n){ return String(n).padStart(2,'0'); }
+  function fmtDateTime(d){ if(!d) return ''; return `${d.getFullYear()}-${two(d.getMonth()+1)}-${two(d.getDate())} ${two(d.getHours())}:${two(d.getMinutes())}`; }
+  function minutesBetween(a,b){ return (b-a)/60000; }
+
+  // ======= Turnos =======
+  const fecha = document.getElementById('fecha');
+  const turnoSel = document.getElementById('turno');
+
+  (function renderTurnos(){
+    if(!turnoSel) return;
+    const placeholder = turnoSel.querySelector('option[value=""]');
+    turnoSel.innerHTML = '';
+    if (placeholder) turnoSel.appendChild(placeholder);
+    PROFILE.turnos.forEach(t => {
+      const opt = new Option(t.label, t.id);
+      opt.dataset.turno = t.turnoNum;
+      opt.dataset.start = t.start;
+      opt.dataset.end   = t.end;
+      opt.dataset.cross = t.cross;
+      turnoSel.appendChild(opt);
+    });
+  })();
+
+  function getShiftBoundsLocal(dateStr){
+    if(!dateStr || !turnoSel || !turnoSel.value) return null;
+    const opt = turnoSel.selectedOptions && turnoSel.selectedOptions[0];
+    if(!opt) return null;
+    const base = parseDateOnlyLocal(dateStr);
+    const startHM = (opt.dataset.start || '07:00').split(':').map(Number);
+    const endHM   = (opt.dataset.end   || '15:00').split(':').map(Number);
+    const cross   = (opt.dataset.cross || 'same');
+
+    const start = new Date(base); start.setHours(startHM[0]||0, startHM[1]||0, 0, 0);
+    const end = new Date(base);   end.setHours(endHM[0]||0,   endHM[1]||0,   0, 0);
+    if(cross==='next' || end <= start){ end.setDate(end.getDate()+1); }
+
+    const turnoNum = opt.dataset.turno || '';
+    const label = opt.textContent || '';
+
+    // Sábado overrides
+    const isSaturday = base.getDay() === 6;
+    if (isSaturday && PROFILE.saturdayOverrides && PROFILE.saturdayOverrides[String(turnoNum)]) {
+      const [hh,mm] = PROFILE.saturdayOverrides[String(turnoNum)].split(':').map(Number);
+      end.setFullYear(base.getFullYear(), base.getMonth(), base.getDate());
+      end.setHours(hh||0, mm||0, 0, 0);
+    }
+    return { start, end, turnoNum, label };
+  }
+
+  // ======= Descansos =======
+  function casinoMinutes(bounds, winStart, winEnd, turnoNum){
+    const cfg = PROFILE.casino && PROFILE.casino[String(turnoNum)];
+    if(!cfg) return 0;
+    const t = new Date(bounds.start);
+    if (cfg.nextDay) t.setDate(t.getDate()+1);
+    const [hh,mm] = cfg.time.split(':').map(Number);
+    t.setHours(hh||0, mm||0, 0, 0);
+    return (winStart < t && winEnd > t) ? (cfg.minutes || 0) : 0;
+  }
+
+  function computeWorkAndBreaks(minutesBase){
+    const cad = PROFILE.pausasTrabajo?.cadaMinutos ?? 120;
+    const pz  = PROFILE.pausasTrabajo?.pausaMinutos ?? 10;
+    let work=Math.max(minutesBase,0), prev=-1, count=0, it=0;
+    while(it<24){
+      count=Math.floor(work/cad);
+      if(count===prev) break;
+      prev=count;
+      work=Math.max(minutesBase - count*pz, 0);
+      it++;
+    }
+    return { work, breaks: count*pz, count };
+  }
+
+  // ======= Productos =======
+  function getProductSpeed(value, speedSource){ // speedSource: 'envase'|'empaque'
+    const p = PROFILE.productos.find(x => x.value === value);
+    if(!p) return NaN;
+    if(speedSource === 'empaque') return Number(p.speedPack);
+    return Number(p.speedEnv);
+  }
+  function renderProductos(selectEl, speedSource){
+    // speedSource no cambia el listado, solo la velocidad programada que se asignará
+    selectEl.innerHTML = '';
+    selectEl.appendChild(new Option('-- Seleccione --',''));
+    PROFILE.productos.forEach(p => {
+      const opt=new Option(p.label, p.value);
+      // guardamos ambas velocidades para referencia
+      opt.dataset.env = String(p.speedEnv);
+      opt.dataset.pack = String(p.speedPack);
+      selectEl.appendChild(opt);
+    });
+  }
+
+  // ======= Plantillas UI =======
+  const fabContainer = document.getElementById('fab_container');
+  const envContainer = document.getElementById('env_container');
+  const empContainer = document.getElementById('emp_container');
+
+  function htmlFabricacionTanque(idx){
+    return `
+      <div class="col-12 subsection" id="fab_t${idx}">
+        <div class="sublegend">Tanque No. ${idx}</div>
+        <div class="grid">
+          <div class="col-4">
+            <label for="fab_t${idx}_lote">Lote</label>
+            <input type="text" id="fab_t${idx}_lote" placeholder="Ej: 6A6001" />
+          </div>
+          <div class="col-8">
+            <label for="fab_t${idx}_estado">Estado</label>
+            <input type="text" id="fab_t${idx}_estado" placeholder="Libre (sin opciones)" />
+          </div>
+          <div class="col-12">
+            <label for="fab_t${idx}_pend">Pendientes</label>
+            <textarea id="fab_t${idx}_pend" placeholder="Acciones abiertas, materiales, calidad, etc."></textarea>
+          </div>
+          <div class="col-12">
+            <label for="fab_t${idx}_obs">Observaciones</label>
+            <textarea id="fab_t${idx}_obs" placeholder="Observaciones generales del tanque..."></textarea>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function htmlLot(prefix, title, speedSource, cicloPenalty){
+    // prefix ejemplo: env_sachet_l1  (área_subsección_loteN)
+    // speedSource: 'envase'|'empaque'
+    return `
+      <div class="lot-card" id="${prefix}_card" data-speed-source="${speedSource}" data-ciclo-penalty="${cicloPenalty}">
+        <div class="lot-title">${title}</div>
+        <div class="grid">
+          <div class="col-12">
+            <label for="${prefix}_producto">Producto</label>
+            <select id="${prefix}_producto"></select>
+            <div id="${prefix}_prod_err" class="error-msg">Seleccione un producto válido para asignar la velocidad programada.</div>
+          </div>
+
+          <div class="col-6">
+            <label for="${prefix}_lote">Lote</label>
+            <input type="text" id="${prefix}_lote" placeholder="Ej: 6A6001" />
+          </div>
+          <div class="col-6">
+            <div class="muted">Cálculo: intersección entre el turno seleccionado y la actividad real del lote.</div>
+          </div>
+
+          <div class="col-6">
+            <label for="${prefix}_inicio">Inicio del lote (fecha y hora)</label>
+            <input type="datetime-local" id="${prefix}_inicio" />
+          </div>
+          <div class="col-6">
+            <label for="${prefix}_fin">Fin del lote (fecha y hora)</label>
+            <input type="datetime-local" id="${prefix}_fin" />
+            <div class="hint">Si no terminó, déjelo vacío.</div>
+          </div>
+
+          <div class="col-4">
+            <label for="${prefix}_vel_prog">Velocidad programada (unidades/min)</label>
+            <input type="number" id="${prefix}_vel_prog" class="readonly" readonly />
+            <div class="hint">Se autocompleta según el producto y la sección.</div>
+          </div>
+          <div class="col-4">
+            <label for="${prefix}_vel_real">Velocidad real (unidades/min)</label>
+            <input type="number" id="${prefix}_vel_real" min="0" step="0.1" placeholder="Dato reportado por el supervisor" />
+          </div>
+          <div class="col-4">
+            <label for="${prefix}_ciclos_turno">Cambios de ciclo en el turno</label>
+            <select id="${prefix}_ciclos_turno">
+              <option value="0">0</option>
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="4">4</option>
+              <option value="5">5</option><option value="6">6</option>
+              <option value="7">7</option><option value="8">8</option>
+            </select>
+            <div class="hint">Se descuenta ${cicloPenalty} min por cada cambio de ciclo.</div>
+          </div>
+
+          <div class="col-6">
+            <label for="${prefix}_unid_teoricas">Unidades teóricas (auto)</label>
+            <input type="number" id="${prefix}_unid_teoricas" class="readonly" readonly />
+            <div class="muted" id="${prefix}_detalle_descuentos"></div>
+            <div class="error-msg" id="${prefix}_calc_err"></div>
+          </div>
+          <div class="col-6">
+            <label for="${prefix}_unid_reales">Unidades reales</label>
+            <input type="number" id="${prefix}_unid_reales" min="0" />
+          </div>
+
+          <div class="col-6">
+            <label for="${prefix}_productividad">Productividad (Unidades reales / Unidades teóricas)</label>
+            <input type="text" id="${prefix}_productividad" class="readonly" readonly placeholder="0.00 %" />
+            <div class="hint">Se calcula automáticamente.</div>
+          </div>
+          <div class="col-6">
+            <label for="${prefix}_ciclos_envasados">Ciclos envasados</label>
+            <input type="text" id="${prefix}_ciclos_envasados" placeholder="Ej: 1-3" />
+          </div>
+
+          <div class="col-12">
+            <label for="${prefix}_horas_atraso">Horas de atraso</label>
+            <input type="text" id="${prefix}_horas_atraso" class="readonly" readonly placeholder="min" />
+            <div class="muted" id="${prefix}_atraso_min_detalle" aria-live="polite"></div>
+            <div class="muted" id="${prefix}_atraso_formula" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="rowline"></div>
+
+        <!-- Retraso alistamiento -->
+        <div class="grid">
+          <div class="col-12"><b>Retraso alistamiento</b> <span class="muted">No se suma al atraso ni al total de paros.</span></div>
+          <div class="col-12">
+            <div class="paro-form">
+              <input type="number" id="${prefix}_ralist_min" min="0" step="1" placeholder="Minutos" />
+              <input type="text" id="${prefix}_ralist_just" placeholder="Justificación..." />
+            </div>
+          </div>
+        </div>
+
+        <div class="rowline"></div>
+
+        <!-- PAROS -->
+        <div class="grid">
+          <div class="col-12"><b>Paros</b> (agrega los ítems por categoría)</div>
+
+          ${PROFILE.parosCategorias.map(cat => `
+          <div class="col-12">
+            <label>${cap(cat)} · <span class="badge">Total: <span id="${prefix}_sum_${cat}">0</span> min</span></label>
+            <div class="paro-form">
+              <input type="number" id="${prefix}_${cat}_min" min="0" step="1" placeholder="Minutos" />
+              <input type="text" id="${prefix}_${cat}_just" placeholder="Justificación..." />
+              <button class="ghost" type="button" id="${prefix}_add_${cat}">Agregar</button>
+            </div>
+            <div id="${prefix}_${cat}_err" class="error-msg">Ingrese minutos (&gt;0).</div>
+            <ul class="paro-list" id="${prefix}_list_${cat}"></ul>
+          </div>
+          `).join('')}
+
+          <div class="col-12 kpi">
+            <div><b>Total paros</b> (min): <span class="val" id="${prefix}_paros_total">0</span></div>
+            <div id="${prefix}_paros_alerta" class="muted" aria-live="polite">Se validará contra el atraso calculado.</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  function buildEnvaseUI(){
+    PROFILE.envase.secciones.forEach(secName => {
+      const box = document.createElement('div');
+      box.className = 'subsection';
+      box.id = `env_${secName.toLowerCase()}_box`;
+      box.innerHTML = `
+        <div class="sublegend">Envase ${secName}</div>
+        <div class="inline-note">Cada sección tiene 2 lotes (opcional). Los lotes vacíos no aparecerán en el reporte.</div>
+        <div id="env_${secName.toLowerCase()}_lots"></div>
+      `;
+      envContainer.appendChild(box);
+      const lotsDiv = box.querySelector(`#env_${secName.toLowerCase()}_lots`);
+      for(let i=1;i<=PROFILE.envase.lotesPorSeccion;i++){
+        const pref = `env_${secName.toLowerCase()}_l${i}`;
+        lotsDiv.insertAdjacentHTML('beforeend', htmlLot(pref, `Lote ${i}`, 'envase', PROFILE.cicloPenalty.envase));
+      }
+    });
+  }
+
+  function buildEmpaqueUI(){
+    PROFILE.empaque.secciones.forEach(secName => {
+      const box = document.createElement('div');
+      box.className = 'subsection';
+      box.id = `emp_${secName.toLowerCase()}_box`;
+      box.innerHTML = `
+        <div class="sublegend">${secName}</div>
+        <div class="inline-note">Cada sección tiene 2 lotes (opcional). Los lotes vacíos no aparecerán en el reporte.</div>
+        <div id="emp_${secName.toLowerCase()}_lots"></div>
+      `;
+      empContainer.appendChild(box);
+      const lotsDiv = box.querySelector(`#emp_${secName.toLowerCase()}_lots`);
+      for(let i=1;i<=PROFILE.empaque.lotesPorSeccion;i++){
+        const pref = `emp_${secName.toLowerCase()}_l${i}`;
+        lotsDiv.insertAdjacentHTML('beforeend', htmlLot(pref, `Lote ${i}`, 'empaque', PROFILE.cicloPenalty.empaque));
+      }
+    });
+  }
+
+  // Render Fabricación
+  (function renderFabricacion(){
+    let html='';
+    for(let i=1;i<=PROFILE.fabricacion.tanques;i++){
+      html += htmlFabricacionTanque(i);
+    }
+    fabContainer.innerHTML = html;
+  })();
+
+  // Render Envase y Empaque
+  buildEnvaseUI();
+  buildEmpaqueUI();
+
+  // Rellenar selects de productos
+  document.querySelectorAll('select[id$="_producto"]').forEach(sel => {
+    const speedSrc = sel.closest('.lot-card')?.dataset.speedSource || 'envase';
+    renderProductos(sel, speedSrc);
+  });
+
+  // ======= Controlador de Lote (parametrizado) =======
+  function setupLot(prefix){
+    const root = document.getElementById(`${prefix}_card`);
+    const speedSource = root?.dataset.speedSource || 'envase';
+    const cicloPenalty = Number(root?.dataset.cicloPenalty || 0);
+
+    const env_producto = document.getElementById(`${prefix}_producto`);
+    const prod_err = document.getElementById(`${prefix}_prod_err`);
+    const env_lote = document.getElementById(`${prefix}_lote`);
+    const env_inicio = document.getElementById(`${prefix}_inicio`);
+    const env_fin = document.getElementById(`${prefix}_fin`);
+    const vel_prog = document.getElementById(`${prefix}_vel_prog`);
+    const vel_real = document.getElementById(`${prefix}_vel_real`);
+    const cambios_turno = document.getElementById(`${prefix}_ciclos_turno`);
+    const ciclos_envasados = document.getElementById(`${prefix}_ciclos_envasados`);
+
+    const unid_teoricas = document.getElementById(`${prefix}_unid_teoricas`);
+    const unid_reales = document.getElementById(`${prefix}_unid_reales`);
+    const productividad = document.getElementById(`${prefix}_productividad`);
+    const horas_atraso = document.getElementById(`${prefix}_horas_atraso`);
+    const atraso_min_detalle = document.getElementById(`${prefix}_atraso_min_detalle`);
+    const atraso_formula = document.getElementById(`${prefix}_atraso_formula`);
+    const detalle_descuentos = document.getElementById(`${prefix}_detalle_descuentos`);
+    const calc_err = document.getElementById(`${prefix}_calc_err`);
+
+    // Retraso alistamiento
+    const ralist_min = document.getElementById(`${prefix}_ralist_min`);
+    const ralist_just = document.getElementById(`${prefix}_ralist_just`);
+
+    // Paros
+    const paros_alerta = document.getElementById(`${prefix}_paros_alerta`);
+    const paros_total = document.getElementById(`${prefix}_paros_total`);
+    const cats = (PROFILE.parosCategorias && PROFILE.parosCategorias.length>0)
+      ? PROFILE.parosCategorias.slice() : ['equipo','proceso','alistamiento','ausentismo','materiales'];
+    const sums = Object.fromEntries(cats.map(c=>[c, document.getElementById(`${prefix}_sum_${c}`)]));
+    const addInputs = Object.fromEntries(cats.map(c=>[c, {
+      min:  document.getElementById(`${prefix}_${c}_min`),
+      just: document.getElementById(`${prefix}_${c}_just`),
+      list: document.getElementById(`${prefix}_list_${c}`),
+      err:  document.getElementById(`${prefix}_${c}_err`),
+      btn:  document.getElementById(`${prefix}_add_${c}`),
+    }]));
+    const parosData = { equipo:[], proceso:[], alistamiento:[], ausentismo:[], materiales:[] };
+
+    function getSelectedSpeed(){
+      const val = env_producto.value || '';
+      const v = getProductSpeed(val, speedSource);
+      return isFinite(v) && v>0 ? v : NaN;
+    }
+    function updateVelocidadProgramada(){
+      const v = getSelectedSpeed();
+      if (isFinite(v)) { vel_prog.value = v; prod_err && prod_err.classList.remove('show'); }
+      else { vel_prog.value = ''; prod_err && prod_err.classList.add('show'); }
+    }
+    function setAtrasoMinutos(minutos) {
+      const min = Math.max(0, Math.round(Number(minutos || 0)));
+      horas_atraso.value = String(min);
+      atraso_min_detalle.textContent = `≈ ${min} min`;
+      atraso_min_detalle.dataset.minutos = String(min);
+    }
+    function updateProductividad(){
+      const ut = Number(unid_teoricas?.value || 0);
+      const ur = Number(unid_reales?.value || 0);
+      if (isFinite(ut) && ut > 0 && isFinite(ur) && ur >= 0){
+        const p = (ur / ut) * 100;
+        productividad.value = `${p.toFixed(2)} %`;
+      } else {
+        productividad.value = '';
+      }
+    }
+    function recalcAtraso() {
+      const velProg = Number(vel_prog?.value || 0); // unidades/min
+      const ut = Number(unid_teoricas?.value || 0);
+      const ur = Number(unid_reales?.value || 0);
+      if (!isFinite(velProg) || velProg <= 0) { setAtrasoMinutos(0); atraso_formula.textContent=''; return; }
+      if (!isFinite(ut) || ut <= 0)           { setAtrasoMinutos(0); atraso_formula.textContent=''; return; }
+      if (!isFinite(ur) || ur <  0)           { setAtrasoMinutos(0); atraso_formula.textContent=''; return; }
+      const diffUnid = Math.max(ut - ur, 0);
+      const atrasoMin = diffUnid > 0 ? Math.ceil(diffUnid / velProg) : 0;
+      setAtrasoMinutos(atrasoMin);
+      atraso_formula.textContent = `Fórmula: ceil((${ut} – ${ur}) / ${velProg}) = ${atrasoMin} min`;
+    }
+    function validateParosVsAtraso(){
+      const atrasoMin = Number(atraso_min_detalle.dataset.minutos || 'NaN');
+      const tot = Number(paros_total.textContent || 0);
+      if(!isFinite(atrasoMin) || atrasoMin<=0){
+        paros_alerta.className='muted';
+        paros_alerta.textContent='Se validará contra el atraso calculado.';
+        return;
+      }
+      const diff=Math.abs(tot-atrasoMin);
+      if(diff<=1){ paros_alerta.className='ok'; paros_alerta.textContent=`OK: paros coinciden con el atraso (${Math.round(atrasoMin)} min).`; }
+      else if(diff<=5){ paros_alerta.className='warn'; paros_alerta.textContent=`Revisar: diferencia de ${diff} min vs atraso calculado (${Math.round(atrasoMin)} min).`; }
+      else{ paros_alerta.className='err'; paros_alerta.textContent=`No coincide: paros ${tot} min, atraso ${Math.round(atrasoMin)} min.`; }
+    }
+    function updateParosTotals(){
+      const sumCat = arr=>arr.reduce((a,b)=>a+(Number(b.min)||0),0);
+      let total=0;
+      for(const k of Object.keys(parosData)){ const s=sumCat(parosData[k]); sums[k].textContent=s; total+=s; }
+      paros_total.textContent=total;
+      validateParosVsAtraso();
+    }
+    function renderParoList(cat){
+      const { list } = addInputs[cat];
+      list.innerHTML='';
+      parosData[cat].forEach((it,idx)=>{
+        const li=document.createElement('li'); li.className='paro-item';
+        const minDiv=document.createElement('div'); minDiv.className='paro-min'; minDiv.textContent = `${Number(it.min)||0} min`;
+        const justDiv=document.createElement('div'); justDiv.className='paro-just'; justDiv.textContent = it.just ?? '';
+        const actions=document.createElement('div'); actions.className='paro-actions'; actions.style.marginLeft='auto';
+        const btn=document.createElement('button'); btn.setAttribute('data-del', `${prefix}:${cat}:${idx}`); btn.textContent='✖';
+        actions.appendChild(btn);
+        li.append(minDiv, justDiv, actions);
+        list.appendChild(li);
+      });
+      updateParosTotals();
+    }
+    function attachParoHandlers(){
+      Object.entries(addInputs).forEach(([cat,refs])=>{
+        refs.btn.addEventListener('click', ()=>{
+          refs.err.classList.remove('show');
+          const min = Math.round(Number(refs.min.value));
+          const just = String(refs.just.value || '');
+          if(!isFinite(min) || min<=0){ refs.err.classList.add('show'); return; }
+          parosData[cat].push({min, just});
+          refs.min.value=''; refs.just.value='';
+          renderParoList(cat);
+        });
+      });
+      document.addEventListener('click',(e)=>{
+        const t=e.target;
+        if(t && t.matches('button[data-del]')){
+          const [p,cat,idxStr]=t.getAttribute('data-del').split(':');
+          if(p===prefix){
+            parosData[cat].splice(Number(idxStr),1);
+            renderParoList(cat);
+          }
+        }
+      });
+    }
+
+    function updateCalculos(){
+      updateVelocidadProgramada();
+
+      calc_err.classList.remove('show');
+      calc_err.textContent = '';
+
+      const bounds = getShiftBoundsLocal(fecha.value || '');
+      const turnoNum = bounds?.turnoNum || '';
+      const inicio = parseDateTimeLocal(env_inicio.value);
+      const fin = parseDateTimeLocal(env_fin.value);
+      const velProg = Number(vel_prog.value || 0);
+      const cambCiclo = Math.max(0, Math.round(Number(cambios_turno.value || 0)));
+      const penaltyMin = cambCiclo * cicloPenalty;
+
+      // Reset
+      unid_teoricas.value = '';
+      detalle_descuentos.textContent = '';
+      atraso_formula.textContent = '';
+
+      if(!bounds){
+        calc_err.textContent = 'Seleccione Fecha del turno y Turno.';
+        calc_err.classList.add('show');
+        setAtrasoMinutos(0); validateParosVsAtraso(); updateProductividad(); return;
+      }
+      if(!env_producto.value){
+        setAtrasoMinutos(0); validateParosVsAtraso(); updateProductividad(); return;
+      }
+      if(!inicio){
+        calc_err.textContent = 'Ingrese Inicio del lote (fecha y hora).';
+        calc_err.classList.add('show');
+        setAtrasoMinutos(0); validateParosVsAtraso(); updateProductividad(); return;
+      }
+      if(!isFinite(velProg) || velProg<=0){
+        calc_err.textContent = 'Seleccione el Producto para asignar la velocidad programada.';
+        calc_err.classList.add('show');
+        setAtrasoMinutos(0); validateParosVsAtraso(); updateProductividad(); return;
+      }
+
+      // Intersección Turno ∩ Lote
+      let winStart = new Date(Math.max(bounds.start.getTime(), inicio.getTime()));
+      let winEnd = bounds.end;
+      if (fin) winEnd = new Date(Math.min(bounds.end.getTime(), fin.getTime()));
+
+      if (fin && fin <= bounds.start){
+        unid_teoricas.value = 0;
+        calc_err.textContent = 'El lote terminó antes de iniciar este turno. (Ventana vacía)';
+        calc_err.classList.add('show');
+        setAtrasoMinutos(0); validateParosVsAtraso(); updateProductividad(); return;
+      }
+      if (inicio >= bounds.end){
+        unid_teoricas.value = 0;
+        calc_err.textContent = 'El lote inicia después de terminar este turno. (Ventana vacía)';
+        calc_err.classList.add('show');
+        setAtrasoMinutos(0); validateParosVsAtraso(); updateProductividad(); return;
+      }
+      if(!(winStart < winEnd)){
+        unid_teoricas.value = 0;
+        calc_err.textContent = 'La ventana de cálculo quedó vacía. Verifique horarios.';
+        calc_err.classList.add('show');
+        setAtrasoMinutos(0); validateParosVsAtraso(); updateProductividad(); return;
+      }
+
+      // Descuentos
+      const minutosBrutos = Math.max(0, minutesBetween(winStart, winEnd));
+      const descCasino = casinoMinutes(bounds, winStart, winEnd, turnoNum);
+      // Primero restamos casino y cambios de ciclo al tiempo base
+      const base = Math.max(minutosBrutos - descCasino - penaltyMin, 0);
+      const { work: minutosTrabajo, breaks: descPausas, count: cantPausas } = computeWorkAndBreaks(base);
+      const minutosEfectivos = Math.max(minutosTrabajo, 0);
+
+      // Teóricas
+      const teoricas = Math.floor(minutosEfectivos * velProg);
+      unid_teoricas.value = isFinite(teoricas) ? teoricas : '';
+
+      // Detalle de descuentos
+      const casinoTxt = descCasino ? ` · Casino ${descCasino} min` : '';
+      const ciclosTxt = cambCiclo ? ` · Cambios de ciclo ${cambCiclo}×${cicloPenalty} = ${penaltyMin} min` : '';
+      const pausasTxt = cantPausas > 0 ? ` · Pausas ${cantPausas}×${PROFILE.pausasTrabajo.pausaMinutos} = ${descPausas} min` : ' · Pausas 0 min';
+      detalle_descuentos.textContent = `Ventana: ${fmtDateTime(winStart)} → ${fmtDateTime(winEnd)} | Bruto: ${Math.round(minutosBrutos)} min${casinoTxt}${ciclosTxt}${pausasTxt} → Efectivo: ${Math.round(minutosEfectivos)} min`;
+
+      // Atraso, validación y productividad
+      recalcAtraso();
+      validateParosVsAtraso();
+      updateProductividad();
+    }
+
+    function buildLotMessage(title){
+      // Consideramos "activo" si hay producto
+      if(!env_producto.value) return '';
+      const iniDT=parseDateTimeLocal(env_inicio.value); 
+      const finDT=parseDateTimeLocal(env_fin.value);
+      const ini=iniDT?fmtDateTime(iniDT):'N/A'; 
+      const fin=finDT?fmtDateTime(finDT):'N/A';
+      const vp=vel_prog.value||'N/A'; 
+      const vr=vel_real.value||'N/A';
+      const ut=unid_teoricas.value||'N/A'; 
+      const ur=unid_reales.value||'N/A';
+      const prodTxt = productividad?.value ? productividad.value : 'N/D';
+      const atrasoMinTxt = atraso_min_detalle.dataset.minutos ? `${atraso_min_detalle.dataset.minutos} min` : 'N/D';
+      const ciclosTurno = Math.max(0, Math.round(Number(cambios_turno.value || 0)));
+      const ciclosEnvTxt = (ciclos_envasados.value || '').trim() || 'N/A';
+
+      // Retraso alistamiento (solo si hay datos)
+      const ralMin = Math.max(0, Math.round(Number(ralist_min.value || 0)));
+      const ralJust = String(ralist_just.value || '').trim();
+      const ralLine = (ralMin>0 || ralJust) ? `- Retraso alistamiento: ${ralMin} min${ralJust ? ' – ' + ralJust : ''}` : '';
+
+      const lines=[];
+      lines.push(title);
+      lines.push(`- Producto: ${env_producto.value}`);
+      lines.push(`- Lote: ${env_lote.value || 'N/A'}`);
+      lines.push(`- Inicio: ${ini}`);
+      lines.push(`- Fin: ${fin}`);
+      lines.push(`- Velocidad programada: ${vp} unid/min`);
+      lines.push(`- Velocidad real (reportada): ${vr} unid/min`);
+      lines.push(`- Cambios de ciclo en el turno: ${ciclosTurno}`);
+      lines.push(`- Unidades teóricas: ${ut}`);
+      lines.push(`- Unidades reales: ${ur}`);
+      lines.push(`- Productividad: ${prodTxt}`);
+      lines.push(`- Ciclos envasados: ${ciclosEnvTxt}`);
+      lines.push(`- Horas de atraso: ${atrasoMinTxt}`);
+      if(ralLine) lines.push(ralLine);
+      lines.push('');
+      lines.push('PAROS');
+
+      const labels={equipo:'Equipo', proceso:'Proceso', alistamiento:'Alistamiento', ausentismo:'Ausentismo', materiales:'Materiales'};
+      for(const [cat,label] of Object.entries(labels)){
+        const arr = (function(){
+          // snapshot de parosData:
+          // NOTA: parosData está en el cierre; lo usamos directamente
+          return parosData[cat] || [];
+        })();
+        const catTotal = arr.reduce((t,it)=> t + (Number(it.min)||0), 0);
+        lines.push(`${label}·Total: ${catTotal} min`);
+        if(arr.length>0){
+          arr.forEach(it=> lines.push(`• ${Number(it.min)||0} min–${it.just ?? ''}`));
+        }
+      }
+      lines.push(`Total paros: ${paros_total.textContent} min`);
+      return lines.join('\n');
+    }
+
+    ;[fecha,turnoSel,env_inicio,env_fin,vel_real,cambios_turno].forEach(el=>{
+      el.addEventListener('input', updateCalculos);
+      el.addEventListener('change', updateCalculos);
+    });
+    env_producto.addEventListener('change', ()=>{ updateVelocidadProgramada(); updateCalculos(); });
+    env_producto.addEventListener('input',  ()=>{ updateVelocidadProgramada(); updateCalculos(); });
+
+    unid_reales.addEventListener('input',  ()=>{ updateProductividad(); recalcAtraso(); validateParosVsAtraso(); });
+    unid_reales.addEventListener('change', ()=>{ updateProductividad(); recalcAtraso(); validateParosVsAtraso(); });
+
+    attachParoHandlers();
+    cats.forEach(renderParoList);
+
+    return {
+      updateCalculos, updateProductividad, recalcAtraso, updateVelocidadProgramada,
+      buildLotMessage,
+      isActive: () => Boolean(env_producto.value),
+      validateRequired: () => {
+        if(!env_producto.value) return true; // opcional si no hay producto
+        if(!env_inicio.value){ alert('['+ titleFromPrefix(prefix) +'] Ingrese Inicio del lote.'); return false; }
+        if(!vel_prog.value){ alert('['+ titleFromPrefix(prefix) +'] La velocidad programada no se ha asignado (verifique Producto).'); return false; }
+        return true;
+      },
+      clear: () => {
+        env_producto.value=''; env_lote.value=''; env_inicio.value=''; env_fin.value='';
+        vel_prog.value=''; vel_real.value=''; unid_teoricas.value=''; unid_reales.value=''; productividad.value='';
+        cambios_turno.value='0'; ciclos_envasados.value='';
+        if(ralist_min) ralist_min.value='';
+        if(ralist_just) ralist_just.value='';
+        setAtrasoMinutos(0);
+        detalle_descuentos.textContent=''; calc_err.classList.remove('show'); calc_err.textContent='';
+        Object.keys(parosData).forEach(k=> parosData[k]=[]);
+        cats.forEach(renderParoList);
+        paros_total.textContent='0'; paros_alerta.className='muted'; paros_alerta.textContent='Se validará contra el atraso calculado.';
+      }
+    };
+  }
+
+  function titleFromPrefix(prefix){
+    // env_sachet_l1 -> "Envase Sachet – Lote 1"
+    // emp_enfundadora_l1 -> "Empaque Enfundadora – Lote 1"
+    const parts = prefix.split('_'); // [area, subsec, lX]
+    const area = parts[0]==='env' ? 'Envase' : (parts[0]==='emp' ? 'Empaque' : 'Sección');
+    const sub = parts[1] ? cap(parts[1]) : '';
+    const lot = parts[2] ? ('Lote ' + parts[2].replace('l','')) : '';
+    return `${area} ${sub} – ${lot}`.trim();
+  }
+
+  // ======= Instanciar controladores de lotes =======
+  const lotPrefixes = [];
+  // Envase
+  PROFILE.envase.secciones.forEach(sec=>{
+    for(let i=1;i<=PROFILE.envase.lotesPorSeccion;i++){
+      lotPrefixes.push(`env_${sec.toLowerCase()}_l${i}`);
+    }
+  });
+  // Empaque
+  PROFILE.empaque.secciones.forEach(sec=>{
+    for(let i=1;i<=PROFILE.empaque.lotesPorSeccion;i++){
+      lotPrefixes.push(`emp_${sec.toLowerCase()}_l${i}`);
+    }
+  });
+
+  const LotControllers = Object.fromEntries(lotPrefixes.map(p=>[p, setupLot(p)]));
+
+  // ======= Validaciones de secciones =======
+  function fabricacionCountActive(){
+    let cnt=0;
+    for(let i=1;i<=PROFILE.fabricacion.tanques;i++){
+      const l = (document.getElementById(`fab_t${i}_lote`)?.value || '').trim();
+      const e = (document.getElementById(`fab_t${i}_estado`)?.value || '').trim();
+      const p = (document.getElementById(`fab_t${i}_pend`)?.value || '').trim();
+      const o = (document.getElementById(`fab_t${i}_obs`)?.value || '').trim();
+      if (l || e || p || o) cnt++;
+    }
+    return cnt;
+  }
+  function envaseCountLineasActivas(){
+    // Una línea (Sachet/Frasco/Enema) se considera activa si al menos un lote de esa línea tiene producto
+    let active = 0;
+    PROFILE.envase.secciones.forEach(sec=>{
+      const p1 = LotControllers[`env_${sec.toLowerCase()}_l1`];
+      const p2 = LotControllers[`env_${sec.toLowerCase()}_l2`];
+      if ((p1 && p1.isActive()) || (p2 && p2.isActive())) active++;
+    });
+    return active;
+  }
+
+  // ======= Mensaje (WhatsApp) =======
+  const ausentismos = document.getElementById('ausentismos');
+
+  function buildMessage(){
+    const bounds = getShiftBoundsLocal(fecha.value || '');
+    const turnoNum = bounds?.turnoNum || '';
+    const turnoLabel = bounds?.label || '';
+
+    const f = fecha.value||''; 
+    const aus = ausentismos.value||'N/A';
+
+    const lines=[];
+    lines.push(PROFILE.mensajeHeader || 'ENTREGA DE TURNO');
+    lines.push(`Fecha: ${f} · Turno: ${turnoNum}`);
+    lines.push(`Horario: ${turnoLabel}`);
+    lines.push(`Ausentismos: ${aus}`);
+    lines.push('');
+
+    // FABRICACIÓN
+    lines.push('FABRICACIÓN');
+    let anyFab=false;
+    for(let i=1;i<=PROFILE.fabricacion.tanques;i++){
+      const l = (document.getElementById(`fab_t${i}_lote`)?.value || '').trim();
+      const e = (document.getElementById(`fab_t${i}_estado`)?.value || '').trim();
+      const p = (document.getElementById(`fab_t${i}_pend`)?.value || '').trim();
+      const o = (document.getElementById(`fab_t${i}_obs`)?.value || '').trim();
+      if (l || e || p || o){
+        anyFab=true;
+        lines.push(`- Tanque No. ${i}`);
+        lines.push(`  • Lote: ${l || 'N/A'}`);
+        lines.push(`  • Estado: ${e || 'N/A'}`);
+        lines.push(`  • Pendientes: ${p || 'N/A'}`);
+        lines.push(`  • Observaciones: ${o || 'N/A'}`);
+      }
+    }
+    if (!anyFab){ lines.push('(Sin registros)'); }
+    lines.push('');
+
+    // ENVASE
+    let anyEnv = false;
+    PROFILE.envase.secciones.forEach(sec=>{
+      const nsec = `Envase ${sec}`;
+      const c1 = LotControllers[`env_${sec.toLowerCase()}_l1`];
+      const c2 = LotControllers[`env_${sec.toLowerCase()}_l2`];
+      const msg1 = c1?.buildLotMessage(`${nsec} – Lote 1`) || '';
+      const msg2 = c2?.buildLotMessage(`${nsec} – Lote 2`) || '';
+      if (msg1 || msg2){
+        anyEnv = true;
+        if (msg1) { lines.push(msg1); lines.push(''); }
+        if (msg2) { lines.push(msg2); lines.push(''); }
+      }
+    });
+    if (!anyEnv){
+      lines.push('ENVASE');
+      lines.push('(Sin registros)');
+      lines.push('');
+    }
+
+    // EMPAQUE
+    let anyEmp = false;
+    PROFILE.empaque.secciones.forEach(sec=>{
+      const nsec = `Empaque ${sec}`;
+      const c1 = LotControllers[`emp_${sec.toLowerCase()}_l1`];
+      const c2 = LotControllers[`emp_${sec.toLowerCase()}_l2`];
+      const msg1 = c1?.buildLotMessage(`${nsec} – Lote 1`) || '';
+      const msg2 = c2?.buildLotMessage(`${nsec} – Lote 2`) || '';
+      if (msg1 || msg2){
+        anyEmp = true;
+        if (msg1) { lines.push(msg1); lines.push(''); }
+        if (msg2) { lines.push(msg2); lines.push(''); }
+      }
+    });
+    if (!anyEmp){
+      lines.push('EMPAQUE');
+      lines.push('(Sin registros)');
+      lines.push('');
+    }
+
+    return lines.join('\n');
+  }
+
+  // ======= Utilidades =======
+  function openWhatsApp(text){ const url=`https://wa.me/?text=${encodeURIComponent(text)}`; window.open(url,'_blank'); }
+  function copyToClipboard(text){
+    navigator.clipboard.writeText(text).then(()=>alert('Mensaje copiado al portapapeles.')).catch(()=>{
+      const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      alert('Mensaje copiado (método alternativo).');
+    });
+  }
+  function clearForm(){
+    ausentismos.value='';
+    // Fabricación
+    for(let i=1;i<=PROFILE.fabricacion.tanques;i++){
+      ['lote','estado','pend','obs'].forEach(f=>{
+        const el = document.getElementById(`fab_t${i}_${f}`); if(el) el.value='';
+      });
+    }
+    // Lotes
+    Object.values(LotControllers).forEach(C=> C.clear());
+    mensaje.value=''; btn_whatsapp.disabled=true; btn_copiar.disabled=true;
+    fecha.valueAsDate=new Date(); turnoSel.value='';
+    document.getElementById('fab_alert').textContent='';
+    document.getElementById('env_alert').textContent='';
+  }
+
+  // ======= Botones =======
+  const btn_generar = document.getElementById('btn_generar');
+  const btn_whatsapp = document.getElementById('btn_whatsapp');
+  const btn_copiar = document.getElementById('btn_copiar');
+  const btn_limpiar = document.getElementById('btn_limpiar');
+  const mensaje = document.getElementById('mensaje');
+
+  function validateBeforeGenerate(){
+    if(!fecha.value){ alert('Seleccione la Fecha del turno.'); return false; }
+    if(!turnoSel.value){ alert('Seleccione el Turno.'); return false; }
+
+    // Fabricación: mínimo 2 tanques con información
+    const fabCnt = fabricacionCountActive();
+    const fabMin = PROFILE.fabricacion.minReportados ?? 2;
+    const fabAlert = document.getElementById('fab_alert');
+    if (fabCnt < fabMin){
+      fabAlert.textContent = `Debe diligenciar al menos ${fabMin} tanques en Fabricación.`;
+      fabAlert.className = 'alert-line err';
+      alert(`Fabricación: debe diligenciar al menos ${fabMin} tanques.`);
+      return false;
+    } else {
+      fabAlert.textContent = `Tanques reportados: ${fabCnt}.`;
+      fabAlert.className = 'alert-line ok';
+    }
+
+    // Envase: mínimo 2 líneas activas
+    const envAct = envaseCountLineasActivas();
+    const envMin = PROFILE.envase.minSeccionesActivas ?? 2;
+    const envAlert = document.getElementById('env_alert');
+    if (envAct < envMin){
+      envAlert.textContent = `Debe diligenciar información en al menos ${envMin} líneas de Envase (Sachet/Frasco/Enema).`;
+      envAlert.className = 'alert-line err';
+      alert(`Envase: debe diligenciar al menos ${envMin} líneas (Sachet/Frasco/Enema).`);
+      return false;
+    } else {
+      envAlert.textContent = `Líneas de Envase activas: ${envAct}.`;
+      envAlert.className = 'alert-line ok';
+    }
+
+    // Validar cada lote activo (inicio/velocidad)
+    for(const [pref, C] of Object.entries(LotControllers)){
+      if(!C.validateRequired()) return false;
+    }
+    return true;
+  }
+
+  btn_generar.addEventListener('click', (e)=>{
+    e.preventDefault();
+    if(!validateBeforeGenerate()) return;
+    // Recalcular todos los lotes
+    Object.values(LotControllers).forEach(C=>{ C.updateCalculos(); C.updateProductividad(); });
+
+    const text = buildMessage();
+    mensaje.value = text;
+    btn_whatsapp.disabled=false; btn_copiar.disabled=false;
+  });
+  btn_whatsapp.addEventListener('click', e=>{ e.preventDefault(); if(!mensaje.value){ alert('Genere el mensaje primero.'); return; } openWhatsApp(mensaje.value); });
+  btn_copiar.addEventListener('click', e=>{ e.preventDefault(); if(!mensaje.value){ alert('Genere el mensaje primero.'); return; } copyToClipboard(mensaje.value); });
+  btn_limpiar.addEventListener('click', e=>{ e.preventDefault(); clearForm(); });
+
+  // ======= Inicial =======
+  const verEl = document.getElementById('app_version');
+  if (verEl) {
+    verEl.textContent = `${APP_VERSION} · clic para recargar`;
+    verEl.addEventListener('click', ()=>{
+      const base = location.href.split('?')[0];
+      location.href = `${base}?v=${Date.now()}`;
+    });
+  }
+
+  if(!fecha.value){ fecha.valueAsDate = new Date(); }
+
+  // Inicial: forzar un primer cálculo vacío
+  Object.values(LotControllers).forEach(C=>{ C.updateVelocidadProgramada(); C.updateCalculos(); C.updateProductividad(); });
+
+})();
+</script>
+</body>
+</html>
